@@ -1,5 +1,6 @@
 """Run the gomill testsuite against an installed gomill package."""
 
+from __future__ import print_function
 import imp
 import os
 import sys
@@ -31,7 +32,7 @@ def _make_newtests():
 _make_newtests()
 
 dirname = os.path.abspath(os.path.dirname(gomill.__file__))
-print >>sys.stderr, "testing gomill package in %s" % dirname
+print("testing gomill package in %s" % dirname, file=sys.stderr)
 from gomill_tests import run_gomill_testsuite
 run_gomill_testsuite.main()
 

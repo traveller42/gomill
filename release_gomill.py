@@ -1,5 +1,6 @@
 """Package a gomill release."""
 
+from __future__ import print_function
 import os
 import re
 import shutil
@@ -16,7 +17,7 @@ def check_output(*args, **kwargs):
         raise CalledProcessError(retcode, args[0], output=output)
     return output
 
-class Failure(StandardError):
+class Failure(Exception):
     pass
 
 def read_python_file(pathname):
@@ -119,7 +120,7 @@ def do_release(tag, config_pathname):
 
     try:
         config = read_python_file(config_pathname)
-    except StandardError, e:
+    except Exception as e:
         raise Failure("error reading config file:\n%s" % e)
 
     export_dir = os.path.join(config['working_dir'], tag)
@@ -166,8 +167,8 @@ def main(argv):
         if not os.path.exists(config_pathname):
             raise Failure("config file %s does not exist" % config_pathname)
         do_release(tag, config_pathname)
-    except (EnvironmentError, Failure), e:
-        print >>sys.stderr, "release_gomill.py: %s" % e
+    except (EnvironmentError, Failure) as e:
+        print("release_gomill.py: %s" % e, file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
