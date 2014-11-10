@@ -9,6 +9,7 @@ Test output may need adjusting if gnugo RNG changes.
 
 """
 
+from __future__ import print_function
 import os
 import re
 import shutil
@@ -171,7 +172,7 @@ def scrub_sgf(s):
     return s
 
 def testrun(test, sandbox_dir):
-    print "** %s" % test.code
+    print("** %s" % test.code)
     sgfbase = os.path.join(sandbox_dir, test.code)
     try:
         output = subprocess.check_output(
@@ -179,28 +180,28 @@ def testrun(test, sandbox_dir):
             shell=True,
             stderr=subprocess.STDOUT)
         status = 0
-    except subprocess.CalledProcessError, e:
+    except subprocess.CalledProcessError as e:
         status = e.returncode
         output = e.output
     passed = True
     if output != test.output:
         passed = False
-        print "BAD OUTPUT"
-        print output
+        print("BAD OUTPUT")
+        print(output)
     if status != test.exit_status:
         passed = False
-        print "BAD EXIT STATUS"
-        print status
+        print("BAD EXIT STATUS")
+        print(status)
     if test.sgf:
         sgf_written = open("%s/%s000.sgf" % (sandbox_dir, test.code)).read()
         if scrub_sgf(sgf_written) != test.sgf:
             passed = False
-            print "BAD SGF"
-            print sgf_written
+            print("BAD SGF")
+            print(sgf_written)
     if passed:
-        print "TEST PASSED"
+        print("TEST PASSED")
     else:
-        print "TEST FAILED"
+        print("TEST FAILED")
 
 #SKIP = set(['gnugo', 'verbose-1'])
 SKIP = set()
@@ -210,7 +211,7 @@ def main():
     try:
         for test in tests:
             if test.code in SKIP:
-                print "## %s: SKIP" % test.code
+                print("## %s: SKIP" % test.code)
                 continue
             testrun(test, dirname)
     finally:

@@ -25,6 +25,7 @@ unenlightening in the example.]]
 
 """
 
+from __future__ import print_function
 import os
 import random
 import sys
@@ -145,7 +146,7 @@ def main():
     if options.report_environ:
         for key, value in sorted(os.environ.iteritems()):
             if key.startswith("GOMILL_"):
-                print >>sys.stderr, "%s=%s" % (key, value)
+                print("%s=%s" % (key, value), file=sys.stderr)
 
     #time.sleep(1)
     try:

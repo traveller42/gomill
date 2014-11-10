@@ -4,6 +4,7 @@ This also exercises the ringmaster with a 'playoff' tournament.
 
 """
 
+from __future__ import print_function
 import os
 import shutil
 import subprocess
@@ -67,11 +68,11 @@ def run_ringmaster(ctl_pathname):
             ["python", "-m", "gomill.ringmaster_command_line",
              ctl_pathname, "run", "--quiet"],
             stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, e:
-        print e.output
+    except subprocess.CalledProcessError as e:
+        print(e.output)
         raise TestFailed("ringmaster: %d" % e.returncode)
     if output != ringmaster_expected:
-        print output
+        print(output)
         raise TestFailed("ringmaster")
 
 def find_forfeits(ctl_pathname):
@@ -79,11 +80,11 @@ def find_forfeits(ctl_pathname):
         output = subprocess.check_output(
             ["python", "gomill_examples/find_forfeits.py", ctl_pathname],
             stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, e:
-        print e.output
+    except subprocess.CalledProcessError as e:
+        print(e.output)
         raise TestFailed("find_forfeits: %d" % e.returncode)
     if output != find_forfeits_expected:
-        print output
+        print(output)
         raise TestFailed("find_forfeits")
 
 def main():
@@ -93,9 +94,9 @@ def main():
         run_ringmaster(ctl_pathname)
         find_forfeits(ctl_pathname)
     except TestFailed:
-        print "TEST FAILED"
+        print("TEST FAILED")
     else:
-        print "TEST PASSED"
+        print("TEST PASSED")
     finally:
         shutil.rmtree(dirname)
 

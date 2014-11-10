@@ -4,6 +4,7 @@ Doesn't cover very much at the moment.
 
 """
 
+from __future__ import print_function
 import os
 import re
 import shutil
@@ -59,11 +60,11 @@ class Test(object):
                  self.ctl_pathname, "run", "--quiet"] + self.args
         try:
             output = subprocess.check_output(args, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError, e:
-            print e.output
+        except subprocess.CalledProcessError as e:
+            print(e.output)
             raise TestFailed("ringmaster exit status: %d" % e.returncode)
         if output != "":
-            print output
+            print(output)
             raise TestFailed("unexpected output from ringmaster")
 
     def parse_game_log(self, loglines):
@@ -96,25 +97,25 @@ class Test(object):
             loglines = open(log_pathname).readlines()
             try:
                 game_log = self.parse_game_log(loglines)
-            except ValueError, e:
-                print "".join(loglines)
+            except ValueError as e:
+                print("".join(loglines))
                 raise TestFailed("can't parse event log: %s" % e)
             if game_log != self.game_log:
-                print game_log
+                print(game_log)
                 raise TestFailed("log not as expected")
 
     def run(self):
-        print "** %s" % self.code
+        print("** %s" % self.code)
         dirname = tempfile.mkdtemp(prefix='test_ringmaster')
         try:
             self.make_ctl_file(dirname)
             self.run_ringmaster()
             self.run_checks()
-        except TestFailed, e:
-            print e
-            print "TEST FAILED"
+        except TestFailed as e:
+            print(e)
+            print("TEST FAILED")
         else:
-            print "TEST PASSED"
+            print("TEST PASSED")
         finally:
             shutil.rmtree(dirname)
 

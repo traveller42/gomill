@@ -1,5 +1,6 @@
 """Test engine behaviour when controller disappears."""
 
+from __future__ import print_function
 import os
 import signal
 import subprocess
@@ -29,7 +30,7 @@ def run_engine(args):
         try:
             gtp_engine.run_interactive_gtp_session(engine)
         except gtp_engine.ControllerDisconnected:
-            print >>sys.stderr, "[controller disconnected]"
+            print("[controller disconnected]", file=sys.stderr)
             sys.exit(3)
     else:
         gtp_engine.run_interactive_gtp_session(engine)
@@ -41,7 +42,7 @@ def test_exiting_controller(mode):
     mode -- 'noisy', 'silent', 'sigpipe'
 
     """
-    print "\n\n** Starting run in mode %s" % mode
+    print("\n\n** Starting run in mode %s" % mode)
     args = []
     if mode == "sigpipe":
         args.append("sigpipe")
@@ -68,7 +69,7 @@ def test_exiting_controller(mode):
     p.stdin.close()
 
     exit_status = p.wait()
-    print "exit status was %s" % exit_status
+    print("exit status was %s" % exit_status)
     assert exit_status == exit_status_by_mode[mode]
 
 
@@ -79,7 +80,7 @@ def main(argv):
         test_exiting_controller(mode='noisy')
         test_exiting_controller(mode='silent')
         test_exiting_controller(mode='sigpipe')
-        print "\nTEST PASSED\n"
+        print("\nTEST PASSED\n")
 
 if __name__ == "__main__":
     main(sys.argv)

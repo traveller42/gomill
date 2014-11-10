@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import random
 import sys
@@ -36,8 +37,8 @@ class Game_dispatcher(object):
         pass
 
     def process_error_response(self, job, message):
-        print "** Error from worker working on %s" % job
-        print message
+        print("** Error from worker working on %s" % job)
+        print(message)
         self.errors_seen.append(message)
 
 
@@ -59,7 +60,7 @@ def test2():
         "failing line:\n"
         "int(\"forcefailure4\")\n"
         ]
-    print "\nTEST PASSED\n"
+    print("\nTEST PASSED\n")
 
 if __name__ == "__main__":
     test2()
