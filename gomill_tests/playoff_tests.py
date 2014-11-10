@@ -3,7 +3,10 @@
 from __future__ import with_statement
 
 from textwrap import dedent
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from gomill import competitions
 from gomill import playoffs

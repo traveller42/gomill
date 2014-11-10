@@ -7,14 +7,14 @@ if sys.version_info >= (2, 7):
 else:
     try:
         import unittest2
-    except ImportError, e:
+    except ImportError as e:
         e.unittest2_missing = True
         raise
 
 # This makes TestResult ignore lines from this module in tracebacks
 __unittest = True
 
-class SupporterError(StandardError):
+class SupporterError(Exception):
     """Exception raised by support objects when something goes wrong.
 
     This is raised to indicate things like sequencing errors detected by mock
@@ -141,7 +141,7 @@ def make_simple_tests(source, prefix="test_", testcase_class=SimpleTestCase):
     attribute).
 
     """
-    functions = [value for name, value in source.iteritems()
+    functions = [value for name, value in source.items()
                  if name.startswith(prefix) and callable(value)]
     functions.sort(key=_function_sort_key)
     return [testcase_class(fn) for fn in functions]

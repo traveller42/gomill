@@ -379,9 +379,9 @@ def test_controller_close(tc):
     controller.close()
     tc.assertTrue(controller.channel_is_closed)
     tc.assertTrue(controller.channel.is_closed)
-    tc.assertRaisesRegexp(StandardError, "^channel is closed$",
+    tc.assertRaisesRegexp(Exception, "^channel is closed$",
                           controller.do_command, "test")
-    tc.assertRaisesRegexp(StandardError, "^channel is closed$",
+    tc.assertRaisesRegexp(Exception, "^channel is closed$",
                           controller.close)
     tc.assertListEqual(controller.retrieve_error_messages(), [])
 

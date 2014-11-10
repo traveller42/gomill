@@ -1,6 +1,9 @@
 """Tests for competition_schedulers.py"""
 
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from gomill import competition_schedulers
 

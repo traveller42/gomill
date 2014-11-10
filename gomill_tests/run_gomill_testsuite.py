@@ -53,7 +53,7 @@ def run_testsuite(suite, failfast, buffer):
     runner = unittest2.TextTestRunner(failfast=failfast, buffer=buffer)
     runner.run(suite)
 
-class UnknownTest(StandardError):
+class UnknownTest(Exception):
     """Unknown test module or test name."""
 
 def make_testsuite(module_names, tests_by_module):
@@ -122,7 +122,7 @@ def run(argv):
     module_names, tests_by_module = interpret_args(args)
     try:
         suite = make_testsuite(module_names, tests_by_module)
-    except UnknownTest, e:
+    except UnknownTest as e:
         parser.error(str(e))
     run_testsuite(suite, options.failfast, not options.nobuffer)
 
@@ -137,7 +137,7 @@ def import_unittest():
     global unittest2
     try:
         from gomill_tests.test_framework import unittest2
-    except ImportError, e:
+    except ImportError as e:
         if hasattr(e, 'unittest2_missing'):
             raise NameError("unittest2")
         raise

@@ -1,7 +1,13 @@
 """Test support code for testing Competitions and Ringmasters."""
 
-import cPickle as pickle
-from cStringIO import StringIO
+try:
+    import cPickle as pickle
+except:
+    import pickle
+try:
+    from cStringIO import StringIO as BytesIO
+except:
+    from io import BytesIO
 
 from gomill import game_jobs
 from gomill import gtp_games
@@ -44,13 +50,13 @@ def fake_response(job, winner):
 
 def get_screen_report(comp):
     """Retrieve a competition's screen report."""
-    out = StringIO()
+    out = BytesIO()
     comp.write_screen_report(out)
     return out.getvalue()
 
 def get_short_report(comp):
     """Retrieve a competition's short report."""
-    out = StringIO()
+    out = BytesIO()
     comp.write_short_report(out)
     return out.getvalue()
 

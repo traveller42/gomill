@@ -5,7 +5,10 @@ from __future__ import with_statement, division
 from math import sqrt
 import random
 from textwrap import dedent
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 from gomill import mcts_tuners
 from gomill.game_jobs import Game_job, Game_job_result

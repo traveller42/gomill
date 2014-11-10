@@ -1,7 +1,10 @@
 """Generic (non-gomill-specific) test support code."""
 
 import errno
-from cStringIO import StringIO
+try:
+  from io import BytesIO
+except:
+  from cStringIO import StringIO as BytesIO
 
 from gomill_tests.test_framework import SupporterError
 
@@ -12,7 +15,7 @@ class Mock_writing_pipe(object):
 
     """
     def __init__(self):
-        self.sink = StringIO()
+        self.sink = BytesIO()
         self.is_broken = False
 
     def write(self, s):
@@ -20,7 +23,7 @@ class Mock_writing_pipe(object):
             raise IOError(errno.EPIPE, "Broken pipe")
         try:
             self.sink.write(s)
-        except ValueError, e:
+        except ValueError as e:
             raise IOError(errno.EIO, str(e))
 
     def flush(self):
@@ -48,7 +51,7 @@ class Mock_reading_pipe(object):
 
     """
     def __init__(self, response):
-        self.source = StringIO(response)
+        self.source = BytesIO(response)
         self.is_broken = False
         self.hangs_before_eof = False
 

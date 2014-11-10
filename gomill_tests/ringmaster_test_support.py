@@ -1,7 +1,10 @@
 """Test support code for testing Ringmasters."""
 
 from collections import defaultdict
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO as BytesIO
+except ImportError:
+    from io import BytesIO
 
 from gomill import ringmasters
 from gomill import ringmaster_presenters
@@ -56,18 +59,18 @@ class Testing_ringmaster(ringmasters.Ringmaster):
         self._test_status = None
         self._written_status = None
         ringmasters.Ringmaster.__init__(self, '/nonexistent/ctl/test.ctl')
-        self.set_stdout(StringIO())
+        self.set_stdout(BytesIO())
 
     _presenter_classes = {
         'test' : Test_presenter,
         }
 
     def _open_files(self):
-        self.logfile = StringIO()
-        self.historyfile = StringIO()
+        self.logfile = BytesIO()
+        self.historyfile = BytesIO()
 
     def _close_files(self):
-        # Don't want to close the StringIOs
+        # Don't want to close the BytesIO
         pass
 
     def _read_control_file(self):

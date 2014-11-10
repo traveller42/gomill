@@ -2,7 +2,10 @@
 
 from __future__ import with_statement, division
 
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 from textwrap import dedent
 
 from gomill import cem_tuners
