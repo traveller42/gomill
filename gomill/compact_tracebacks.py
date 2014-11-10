@@ -1,5 +1,6 @@
 """Compact formatting of tracebacks."""
 
+from __future__ import print_function
 import sys
 import traceback
 
@@ -15,17 +16,17 @@ def log_traceback_from_info(exception_type, value, tb, dst=sys.stderr, skip=0):
     if (not isinstance(exception_type, str) and
         issubclass(exception_type, SyntaxError)):
         return
-    print >>dst, 'traceback (most recent call last):'
+    print('traceback (most recent call last):', file=dst)
     text = None
     for filename, lineno, fnname, text in traceback.extract_tb(tb)[skip:]:
         if fnname == "?":
             fn_s = "<global scope>"
         else:
             fn_s = "(%s)" % fnname
-        print >>dst, "  %s:%s %s" % (filename, lineno, fn_s)
+        print("  %s:%s %s" % (filename, lineno, fn_s), file=dst)
     if text is not None:
-        print >>dst, "failing line:"
-        print >>dst, text
+        print("failing line:", file=dst)
+        print(text, file=dst)
 
 def format_traceback_from_info(exception_type, value, tb, skip=0):
     """Return a description of a given exception as a string.
@@ -33,8 +34,11 @@ def format_traceback_from_info(exception_type, value, tb, skip=0):
     skip -- number of traceback entries to omit from the top of the list
 
     """
-    from cStringIO import StringIO
-    log = StringIO()
+    try:
+      from io import BytesIO
+    except:
+      from cStringIO import StringIO as BytesIO
+    log = BytesIO()
     log_traceback_from_info(exception_type, value, tb, log, skip)
     return log.getvalue()
 
@@ -70,14 +74,17 @@ def log_error_and_line_from_info(exception_type, value, tb, dst=sys.stderr):
         except IndexError:
             pass
         else:
-            print >>dst, "at line %s:" % lineno
+            print("at line %s:" % lineno, file=dst)
         for line in traceback.format_exception_only(exception_type, value):
             dst.write(line)
 
 def format_error_and_line_from_info(exception_type, value, tb):
     """Return a brief description of a given exception as a string."""
-    from cStringIO import StringIO
-    log = StringIO()
+    try:
+      from io import BytesIO
+    except:
+      from cStringIO import StringIO as BytesIO
+    log = BytesIO()
     log_error_and_line_from_info(exception_type, value, tb, log)
     return log.getvalue()
 

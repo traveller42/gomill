@@ -1,5 +1,6 @@
 """Competitions for all-play-all tournaments."""
 
+from __future__ import print_function
 from gomill import ascii_tables
 from gomill import game_jobs
 from gomill import competitions
@@ -97,14 +98,14 @@ class Allplayall(tournaments.Tournament):
             ]
         try:
             matchup_parameters = load_settings(matchup_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
         matchup_parameters['alternating'] = True
         matchup_parameters['number_of_games'] = matchup_parameters.pop('rounds')
 
         try:
             specials = load_settings(self.special_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
         if not specials['competitors']:
@@ -115,7 +116,7 @@ class Allplayall(tournaments.Tournament):
         for i, competitor_spec in enumerate(specials['competitors']):
             try:
                 cspec = self.competitor_spec_from_config(i, competitor_spec)
-            except StandardError, e:
+            except Exception as e:
                 code = competitor_spec.get_key()
                 if code is None:
                     code = i
@@ -137,7 +138,7 @@ class Allplayall(tournaments.Tournament):
                         self._get_matchup_id(c1, c2),
                         c1.player, c2.player,
                         matchup_parameters)
-                except StandardError, e:
+                except Exception as e:
                     raise ControlFileError("%s v %s: %s" %
                                            (c1.player, c2.player, e))
                 self.matchups[m.id] = m
@@ -197,11 +198,11 @@ class Allplayall(tournaments.Tournament):
     def write_screen_report(self, out):
         expected = self.count_games_expected()
         if expected is not None:
-            print >>out, "%d/%d games played" % (
-                self.count_games_played(), expected)
+            print("%d/%d games played" % (
+                self.count_games_played(), expected), file=out)
         else:
-            print >>out, "%d games played" % self.count_games_played()
-        print >>out
+            print("%d games played" % self.count_games_played(), file=out)
+        print(file=out)
 
         t = ascii_tables.Table(row_count=len(self.competitors))
         t.add_heading("") # player short_code
@@ -237,11 +238,11 @@ class Allplayall(tournaments.Tournament):
                     "%s-%s" % (format_float(ms.wins_1),
                                format_float(ms.wins_2)))
             t.set_column_values(i, column_values)
-        print >>out, "\n".join(t.render())
+        print("\n".join(t.render()), file=out)
 
     def write_short_report(self, out):
         def p(s):
-            print >>out, s
+            print(s, file=out)
         p("allplayall: %s" % self.competition_code)
         if self.description:
             p(self.description)

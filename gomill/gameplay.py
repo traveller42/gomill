@@ -13,7 +13,7 @@ from gomill import handicap_layout
 from gomill import sgf
 
 
-class GameStateError(StandardError):
+class GameStateError(Exception):
     """Error from Game: wrong state for requested action."""
 
 class Game(object):
@@ -550,7 +550,7 @@ class Backend(object):
         return None
 
 
-class GameRunnerStateError(StandardError):
+class GameRunnerStateError(Exception):
     """Error from Game_runner: wrong state for requested action."""
 
 class Game_runner(object):

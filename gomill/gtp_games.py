@@ -213,7 +213,7 @@ class _Gtp_backend(gameplay.Backend):
                 raise ValueError("response included 'pass'")
             if len(set(points)) < len(points):
                 raise ValueError("duplicate point")
-        except ValueError, e:
+        except ValueError as e:
             raise BadGtpResponse(
                 "invalid response from place_free_handicap command "
                 "to %s: %s" % (self.gc.players["b"], e))
@@ -246,7 +246,7 @@ class _Gtp_backend(gameplay.Backend):
             may_claim = False
         try:
             raw_move = self.gc.send_command(colour, *genmove_command)
-        except BadGtpResponse, e:
+        except BadGtpResponse as e:
             return 'forfeit', str(e)
         move_s = raw_move.lower()
         if move_s == "resign":
@@ -270,7 +270,7 @@ class _Gtp_backend(gameplay.Backend):
         vertex = format_vertex(move)
         try:
             self.gc.send_command(colour, "play", opponent_of(colour), vertex)
-        except BadGtpResponse, e:
+        except BadGtpResponse as e:
             if e.gtp_error_message == "illegal move":
                 return 'reject', ("%s claims move %s is illegal"
                                   % (self.gc.players[colour], vertex))

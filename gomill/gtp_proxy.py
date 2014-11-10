@@ -12,7 +12,7 @@ from gomill.gtp_controller import (
 from gomill.gtp_engine import GtpError, GtpQuit, GtpFatalError
 
 
-class BackEndError(StandardError):
+class BackEndError(Exception):
     """Difficulty communicating with the back end.
 
     Public attributes:
@@ -20,7 +20,7 @@ class BackEndError(StandardError):
 
     """
     def __init__(self, args, cause=None):
-        StandardError.__init__(self, args)
+        Exception.__init__(self, args)
         self.cause = cause
 
 class Gtp_proxy(object):
@@ -50,8 +50,7 @@ class Gtp_proxy(object):
       proxy.engine.add_command(...)
       try:
           proxy.run()
-      except KeyboardInterrupt:
-          sys.exit(1)
+      except KeyboardInterrupt: sys.exit(1)
 
     The default 'quit' handler passes 'quit' on the back end and raises
     GtpQuit.
@@ -99,11 +98,11 @@ class Gtp_proxy(object):
 
         """
         if self._back_end_is_set():
-            raise StandardError("back end already set")
+            raise Exception("back end already set")
         self.controller = controller
         try:
             self.back_end_commands = controller.list_commands()
-        except (GtpChannelError, BadGtpResponse), e:
+        except (GtpChannelError, BadGtpResponse) as e:
             raise BackEndError(str(e), cause=e)
         self._make_engine()
 
@@ -120,7 +119,7 @@ class Gtp_proxy(object):
         """
         try:
             channel = gtp_controller.Subprocess_gtp_channel(command, **kwargs)
-        except GtpChannelError, e:
+        except GtpChannelError as e:
             # Probably means exec failure
             raise BackEndError("can't launch back end command\n%s" % e, cause=e)
         controller = gtp_controller.Gtp_controller(channel, "back end")
@@ -189,10 +188,10 @@ class Gtp_proxy(object):
 
         """
         if not self._back_end_is_set():
-            raise StandardError("back end isn't set")
+            raise Exception("back end isn't set")
         try:
             return self.controller.do_command(command, *args)
-        except GtpChannelError, e:
+        except GtpChannelError as e:
             raise BackEndError(str(e), cause=e)
 
     def handle_command(self, command, args):
@@ -209,9 +208,9 @@ class Gtp_proxy(object):
         """
         try:
             return self.pass_command(command, args)
-        except BadGtpResponse, e:
+        except BadGtpResponse as e:
             raise GtpError(e.gtp_error_message)
-        except BackEndError, e:
+        except BackEndError as e:
             raise GtpFatalError(str(e))
 
     def back_end_has_command(self, command):
@@ -224,10 +223,10 @@ class Gtp_proxy(object):
 
         """
         if not self._back_end_is_set():
-            raise StandardError("back end isn't set")
+            raise Exception("back end isn't set")
         try:
             return self.controller.known_command(command)
-        except GtpChannelError, e:
+        except GtpChannelError as e:
             raise BackEndError(str(e), cause=e)
 
     def expect_back_end_exit(self):
@@ -243,12 +242,12 @@ class Gtp_proxy(object):
         # Ignores GtpChannelClosed
         try:
             result = self.pass_command("quit", [])
-        except BackEndError, e:
+        except BackEndError as e:
             if isinstance(e.cause, GtpChannelClosed):
                 result = ""
             else:
                 raise GtpFatalError(str(e))
-        except BadGtpResponse, e:
+        except BadGtpResponse as e:
             self.expect_back_end_exit()
             raise GtpFatalError(e.gtp_error_message)
         self.expect_back_end_exit()

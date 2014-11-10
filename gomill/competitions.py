@@ -13,7 +13,7 @@ def log_discard(s):
 
 NoGameAvailable = object()
 
-class CompetitionError(StandardError):
+class CompetitionError(Exception):
     """Error from competition code.
 
     This is intended for errors from user-provided functions, but it might also
@@ -23,7 +23,7 @@ class CompetitionError(StandardError):
 
     """
 
-class ControlFileError(StandardError):
+class ControlFileError(Exception):
     """Error interpreting the control file."""
 
 
@@ -196,7 +196,7 @@ class Competition(object):
 
         try:
             to_set = load_settings(self.global_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
         for name, value in to_set.items():
             setattr(self, name, value)
@@ -211,14 +211,14 @@ class Competition(object):
             ]
         try:
             specials = load_settings(settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
         self.players = {}
         for player_code, player_config in specials['players']:
             try:
                 player = self.game_jobs_player_from_config(
                     player_code, player_config)
-            except Exception, e:
+            except Exception as e:
                 raise ControlFileError("player %s: %s" % (player_code, e))
             self.players[player_code] = player
 
@@ -241,12 +241,12 @@ class Competition(object):
             player.cmd_args = config['command']
             if '/' in player.cmd_args[0]:
                 player.cmd_args[0] = self.resolve_pathname(player.cmd_args[0])
-        except Exception, e:
+        except Exception as e:
             raise ControlFileError("'command': %s" % e)
 
         try:
             player.cwd = self.resolve_pathname(config['cwd'])
-        except Exception, e:
+        except Exception as e:
             raise ControlFileError("'cwd': %s" % e)
         player.environ = config['environ']
 
@@ -263,11 +263,11 @@ class Competition(object):
                         words = list(v)
                     if not all(gtp_controller.is_well_formed_gtp_word(word)
                                for word in words):
-                        raise StandardError
+                        raise Exception
                 except Exception:
                     raise ValueError("invalid command %s" % v)
                 player.startup_gtp_commands.append((words[0], words[1:]))
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError("'startup_gtp_commands': %s" % e)
 
         player.gtp_aliases = {}
@@ -278,7 +278,7 @@ class Competition(object):
                 if not gtp_controller.is_well_formed_gtp_word(cmd2):
                     raise ValueError("invalid command %s" % clean_string(cmd2))
                 player.gtp_aliases[cmd1] = cmd2
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError("'gtp_aliases': %s" % e)
 
         if config['discard_stderr']:

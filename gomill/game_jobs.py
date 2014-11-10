@@ -233,7 +233,7 @@ class Game_job(object):
             game = gtp_games.Gtp_game(
                 game_controller, self.board_size, self.komi, self.move_limit)
             game.set_game_id(self.game_id)
-        except ValueError, e:
+        except ValueError as e:
             raise job_manager.JobFailed("error creating game: %s" % e)
         if self.use_internal_scorer:
             game.use_internal_scorer(self.internal_scorer_handicap_compensation)
@@ -256,7 +256,7 @@ class Game_job(object):
                 except ValueError:
                     raise BadGtpResponse("invalid handicap")
             game.run()
-        except (GtpChannelError, BadGtpResponse), e:
+        except (GtpChannelError, BadGtpResponse) as e:
             game_controller.close_players()
             msg = "aborting game due to error:\n%s" % e
             self._record_void_game(game_controller, game, msg)
@@ -391,7 +391,7 @@ class Game_job(object):
         utils.ensure_dir(pathname)
 
 
-class CheckFailed(StandardError):
+class CheckFailed(Exception):
     """Error reported by check_player()"""
 
 class Player_check(object):
@@ -441,7 +441,7 @@ def check_player(player_check, discard_stderr=False):
             channel = gtp_controller.Subprocess_gtp_channel(
                 player.cmd_args,
                 env=env, cwd=player.cwd, stderr=stderr)
-        except GtpChannelError, e:
+        except GtpChannelError as e:
             raise GtpChannelError(
                 "error starting subprocess for %s:\n%s" % (player.code, e))
         controller = gtp_controller.Gtp_controller(channel, player.code)
@@ -453,7 +453,7 @@ def check_player(player_check, discard_stderr=False):
         controller.do_command("clear_board")
         controller.do_command("komi", str(player_check.komi))
         controller.safe_close()
-    except (GtpChannelError, BadGtpResponse), e:
+    except (GtpChannelError, BadGtpResponse) as e:
         raise CheckFailed(str(e))
     else:
         return controller.retrieve_error_messages()

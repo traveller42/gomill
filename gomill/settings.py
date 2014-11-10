@@ -143,7 +143,7 @@ def interpret_shlex_sequence(v):
             raise ValueError("not a string or a sequence")
         try:
             result = [interpret_8bit_string(s) for s in l]
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError("element %s" % e)
     if not result:
         raise ValueError("empty")
@@ -174,7 +174,7 @@ def interpret_sequence_of(item_interpreter):
         for i, v in enumerate(l):
             try:
                 l[i] = item_interpreter(v)
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError("item %s: %s" % (i, e))
         return l
     return interpreter
@@ -224,11 +224,11 @@ def interpret_map_of(key_interpreter, value_interpreter):
         for key, value in interpret_map(m):
             try:
                 new_key = key_interpreter(key)
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError("bad key: %s" % e)
             try:
                 new_value = value_interpreter(value)
-            except ValueError, e:
+            except ValueError as e:
                 # we assume validated keys are fit to print
                 raise ValueError("bad value for '%s': %s" % (new_key, e))
             result.append((new_key, new_value))
@@ -286,7 +286,7 @@ class Setting(object):
         """
         try:
             return self.interpreter(value)
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError("'%s': %s" % (self.name, e))
 
 def load_settings(settings, config, apply_defaults=True, allow_missing=False):
@@ -318,7 +318,7 @@ def load_settings(settings, config, apply_defaults=True, allow_missing=False):
                 if isinstance(v, Config_proxy):
                     try:
                         v = v.resolve()
-                    except ValueError, e:
+                    except ValueError as e:
                         raise ValueError("'%s': %s" % (setting.name, e))
                 # May propagate ValueError
                 v = setting.interpret(v)
@@ -357,7 +357,7 @@ class Config_proxy(object):
     def resolve(self):
         try:
             return self.underlying(*self.args, **self.kwargs)
-        except Exception, e:
+        except Exception as e:
             raise ValueError("invalid parameters for %s:\n%s" %
                              (self.__class__.__name__, e))
 

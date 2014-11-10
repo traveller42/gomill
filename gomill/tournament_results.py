@@ -1,6 +1,6 @@
 """Retrieving and reporting on tournament results."""
 
-from __future__ import division
+from __future__ import division, print_function
 
 from gomill import ascii_tables
 from gomill.utils import format_float, format_percent
@@ -294,7 +294,7 @@ def write_matchup_summary(out, matchup, ms):
 
     """
     def p(s):
-        print >>out, s
+        print(s, file=out)
 
     if matchup.number_of_games is None:
         played_s = "%d" % ms.total

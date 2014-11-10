@@ -1,5 +1,6 @@
 """Job system supporting multiprocessing."""
 
+from __future__ import print_function
 import sys
 
 from gomill import compact_tracebacks
@@ -8,10 +9,10 @@ multiprocessing = None
 
 NoJobAvailable = object()
 
-class JobFailed(StandardError):
+class JobFailed(Exception):
     """Error reported by a job."""
 
-class JobSourceError(StandardError):
+class JobSourceError(Exception):
     """Error from a job source object."""
 
 class JobError(object):
@@ -44,7 +45,7 @@ def worker_run_jobs(job_queue, response_queue, worker_id):
                 break
             try:
                 response = job.run(worker_id)
-            except JobFailed, e:
+            except JobFailed as e:
                 response = JobError(job, str(e))
                 sys.exc_clear()
                 del e
@@ -72,7 +73,7 @@ class Multiprocessing_job_manager(Job_manager):
         Job_manager.__init__(self)
         _initialise_multiprocessing()
         if multiprocessing is None:
-            raise StandardError("multiprocessing not available")
+            raise Exception("multiprocessing not available")
         if not 1 <= number_of_workers < 1024:
             raise ValueError
         self.number_of_workers = number_of_workers
@@ -95,7 +96,7 @@ class Multiprocessing_job_manager(Job_manager):
             if active_jobs < self.number_of_workers:
                 try:
                     job = job_source.get_job()
-                except Exception, e:
+                except Exception as e:
                     for cls in self.passed_exceptions:
                         if isinstance(e, cls):
                             raise
@@ -115,7 +116,7 @@ class Multiprocessing_job_manager(Job_manager):
                 try:
                     job_source.process_error_response(
                         response.job, response.msg)
-                except Exception, e:
+                except Exception as e:
                     for cls in self.passed_exceptions:
                         if isinstance(e, cls):
                             raise
@@ -125,7 +126,7 @@ class Multiprocessing_job_manager(Job_manager):
             else:
                 try:
                     job_source.process_response(response)
-                except Exception, e:
+                except Exception as e:
                     for cls in self.passed_exceptions:
                         if isinstance(e, cls):
                             raise
@@ -151,7 +152,7 @@ class In_process_job_manager(Job_manager):
         while True:
             try:
                 job = job_source.get_job()
-            except Exception, e:
+            except Exception as e:
                 for cls in self.passed_exceptions:
                     if isinstance(e, cls):
                         raise
@@ -162,14 +163,14 @@ class In_process_job_manager(Job_manager):
                 break
             try:
                 response = job.run(None)
-            except Exception, e:
+            except Exception as e:
                 if isinstance(e, JobFailed):
                     msg = str(e)
                 else:
                     msg = compact_tracebacks.format_traceback(skip=1)
                 try:
                     job_source.process_error_response(job, msg)
-                except Exception, e:
+                except Exception as e:
                     for cls in self.passed_exceptions:
                         if isinstance(e, cls):
                             raise
@@ -179,7 +180,7 @@ class In_process_job_manager(Job_manager):
             else:
                 try:
                     job_source.process_response(response)
-                except Exception, e:
+                except Exception as e:
                     for cls in self.passed_exceptions:
                         if isinstance(e, cls):
                             raise
@@ -211,8 +212,8 @@ def run_jobs(job_source, max_workers=None, allow_mp=True,
     except Exception:
         try:
             job_manager.finish()
-        except Exception, e2:
-            print >>sys.stderr, "Error closing down workers:\n%s" % e2
+        except Exception as e2:
+            print("Error closing down workers:\n%s" % e2, file=sys.stderr)
         raise
     job_manager.finish()
 

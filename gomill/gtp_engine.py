@@ -15,7 +15,7 @@ from gomill.utils import isinf, isnan
 from gomill import compact_tracebacks
 
 
-class GtpError(StandardError):
+class GtpError(Exception):
     """Error reported by a command handler."""
 
 class GtpFatalError(GtpError):
@@ -69,7 +69,7 @@ def interpret_vertex(arg, board_size):
     """
     try:
         return move_from_vertex(arg, board_size)
-    except ValueError, e:
+    except ValueError as e:
         raise GtpError(str(e))
 
 
@@ -316,17 +316,17 @@ class Gtp_engine_protocol(object):
         """
         try:
             response = self._do_command(command, args)
-        except GtpQuit, e:
+        except GtpQuit as e:
             is_error = False
             response = e
             end_session = True
-        except GtpFatalError, e:
+        except GtpFatalError as e:
             is_error = True
             response = str(e)
             if response == "":
                 response = "unspecified fatal error"
             end_session = True
-        except GtpError, e:
+        except GtpError as e:
             is_error = True
             response = str(e)
             if response == "":
@@ -435,7 +435,7 @@ def _run_gtp_session(engine, read, write):
         if response is not None:
             try:
                 write(response)
-            except IOError, e:
+            except IOError as e:
                 if e.errno == errno.EPIPE:
                     raise ControllerDisconnected(*e.args)
                 else:

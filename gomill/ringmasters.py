@@ -1,8 +1,11 @@
 """Run competitions using GTP."""
 
-from __future__ import division, with_statement
+from __future__ import division, with_statement, print_function
 
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import datetime
 import errno
 import os
@@ -43,13 +46,13 @@ def interpret_python(source, provided_globals, display_filename):
     result = provided_globals.copy()
     code = compile(source, display_filename, 'exec',
                    division.compiler_flag, True)
-    exec code in result
+    exec(code, result)
     return result
 
-class RingmasterError(StandardError):
+class RingmasterError(Exception):
     """Error reported by a Ringmaster."""
 
-class RingmasterInternalError(StandardError):
+class RingmasterInternalError(Exception):
     """Error reported by a Ringmaster which indicates a bug."""
 
 
@@ -112,7 +115,7 @@ class Ringmaster(object):
         self.status_is_loaded = False
         try:
             self._load_control_file()
-        except ControlFileError, e:
+        except ControlFileError as e:
             raise RingmasterError("error in control file:\n%s" % e)
 
     def set_stdout(self, f):
@@ -131,7 +134,7 @@ class Ringmaster(object):
         try:
             with open(self.control_pathname) as f:
                 return f.read()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("failed to read control file:\n%s" % e)
 
     def _load_control_file(self):
@@ -141,7 +144,7 @@ class Ringmaster(object):
 
         try:
             self.competition_type = self._parse_competition_type(control_s)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError("can't find competition_type")
 
         try:
@@ -164,7 +167,7 @@ class Ringmaster(object):
                 display_filename=self.control_pathname)
         except KeyboardInterrupt:
             raise
-        except ControlFileError, e:
+        except ControlFileError as e:
             raise
         except:
             raise ControlFileError(compact_tracebacks.format_error_and_line())
@@ -176,7 +179,7 @@ class Ringmaster(object):
             self._initialise_from_control_file(config)
         except ControlFileError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise RingmasterError("unhandled error in control file:\n%s" %
                                   compact_tracebacks.format_traceback(skip=1))
 
@@ -184,7 +187,7 @@ class Ringmaster(object):
             self.competition.initialise_from_control_file(config)
         except ControlFileError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise RingmasterError("unhandled error in control file:\n%s" %
                                   compact_tracebacks.format_traceback(skip=1))
 
@@ -255,13 +258,13 @@ class Ringmaster(object):
         """
         try:
             self.logfile = open(self.log_pathname, "a")
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("failed to open log file:\n%s" % e)
 
         if fcntl is not None:
             try:
                 fcntl.flock(self.logfile, fcntl.LOCK_EX|fcntl.LOCK_NB)
-            except IOError, e:
+            except IOError as e:
                 if e.errno in (errno.EACCES, errno.EAGAIN):
                     raise RingmasterError("competition is already running")
             except Exception:
@@ -270,12 +273,12 @@ class Ringmaster(object):
         try:
             if os.path.exists(self.command_pathname):
                 os.remove(self.command_pathname)
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("error removing existing .cmd file:\n%s" % e)
 
         try:
             self.historyfile = open(self.history_pathname, "a")
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("failed to open history file:\n%s" % e)
 
         if self.record_games:
@@ -297,11 +300,11 @@ class Ringmaster(object):
         """Close the log files."""
         try:
             self.logfile.close()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("error closing log file:\n%s" % e)
         try:
             self.historyfile.close()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("error closing history file:\n%s" % e)
 
     ringmaster_settings = [
@@ -317,7 +320,7 @@ class Ringmaster(object):
         """
         try:
             to_set = load_settings(self.ringmaster_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
         for name, value in to_set.items():
             setattr(self, name, value)
@@ -329,7 +332,7 @@ class Ringmaster(object):
         self.worker_count = n
 
     def log(self, s):
-        print >>self.logfile, s
+        print(s, file=self.logfile)
         self.logfile.flush()
 
     def warn(self, s):
@@ -342,7 +345,7 @@ class Ringmaster(object):
         self.presenter.say(channel, s)
 
     def log_history(self, s):
-        print >>self.historyfile, s
+        print(s, file=self.historyfile)
         self.historyfile.flush()
 
     _presenter_classes = {
@@ -396,7 +399,7 @@ class Ringmaster(object):
             }
         try:
             self._write_status((self.status_format_version, status))
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("error writing persistent state:\n%s" % e)
 
     def _load_status(self):
@@ -410,28 +413,28 @@ class Ringmaster(object):
             status_format_version, status = self._load_status()
             if (status_format_version != self.status_format_version or
                 status['comp_vn'] != self.competition.status_format_version):
-                raise StandardError
+                raise Exception
             self.void_game_count = status['void_game_count']
             self.games_in_progress = {}
             self.games_to_replay = {}
             competition_status = status['comp']
         except pickle.UnpicklingError:
             raise RingmasterError("corrupt status file")
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("error loading status file:\n%s" % e)
-        except KeyError, e:
+        except KeyError as e:
             raise RingmasterError("incompatible status file: missing %s" % e)
-        except Exception, e:
+        except Exception as e:
             # Probably an exception from __setstate__ somewhere
             raise RingmasterError("incompatible status file")
         try:
             self.competition.set_status(competition_status)
-        except CompetitionError, e:
+        except CompetitionError as e:
             raise RingmasterError("error loading competition state: %s" % e)
-        except KeyError, e:
+        except KeyError as e:
             raise RingmasterError(
                 "error loading competition state: missing %s" % e)
-        except Exception, e:
+        except Exception as e:
             raise RingmasterError("error loading competition state:\n%s" %
                                   compact_tracebacks.format_traceback(skip=1))
         self.status_is_loaded = True
@@ -443,7 +446,7 @@ class Ringmaster(object):
         self.games_to_replay = {}
         try:
             self.competition.set_clean_status()
-        except CompetitionError, e:
+        except CompetitionError as e:
             raise RingmasterError(e)
         self.status_is_loaded = True
 
@@ -455,7 +458,7 @@ class Ringmaster(object):
         """Print the contents of the persistent state file, for debugging."""
         from pprint import pprint
         status_format_version, status = self._load_status()
-        print >>self.stdout, "status_format_version:", status_format_version
+        print("status_format_version:", status_format_version, file=self.stdout)
         pprint(status, self.stdout)
 
     def write_command(self, command):
@@ -471,7 +474,7 @@ class Ringmaster(object):
             f = open(self.command_pathname, "w")
             f.write(command)
             f.close()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("error writing command file:\n%s" % e)
 
     def get_tournament_results(self):
@@ -548,7 +551,7 @@ class Ringmaster(object):
         self.presenter.clear('screen_report')
         sr = self.presenter.get_stream('screen_report')
         if self.void_game_count > 0:
-            print >>sr, "%d void games; see log file." % self.void_game_count
+            print("%d void games; see log file." % self.void_game_count, file=sr)
         self.competition.write_screen_report(sr)
         sr.close()
 
@@ -596,10 +599,10 @@ class Ringmaster(object):
                     self._halt_competition("stop command received")
                     try:
                         os.remove(self.command_pathname)
-                    except EnvironmentError, e:
+                    except EnvironmentError as e:
                         self.warn("error removing .cmd file:\n%s" % e)
                     return job_manager.NoJobAvailable
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             self.warn("error reading .cmd file:\n%s" % e)
         if self.max_games_this_run is not None:
             if self.max_games_this_run == 0:
@@ -707,11 +710,11 @@ class Ringmaster(object):
             self.log("run interrupted at %s" % now())
             log_games_in_progress()
             raise
-        except (RingmasterError, CompetitionError), e:
+        except (RingmasterError, CompetitionError) as e:
             self.log("run finished with error at %s\n%s" % (now(), e))
             log_games_in_progress()
             raise RingmasterError(e)
-        except (job_manager.JobSourceError, RingmasterInternalError), e:
+        except (job_manager.JobSourceError, RingmasterInternalError) as e:
             self.log("run finished with internal error at %s\n%s" % (now(), e))
             log_games_in_progress()
             raise RingmasterInternalError(e)
@@ -739,8 +742,8 @@ class Ringmaster(object):
             if os.path.exists(pathname):
                 try:
                     os.remove(pathname)
-                except EnvironmentError, e:
-                    print >>sys.stderr, e
+                except EnvironmentError as e:
+                    print(e, file=sys.stderr)
         for pathname in [
             self.sgf_dir_pathname,
             self.void_dir_pathname,
@@ -749,8 +752,8 @@ class Ringmaster(object):
             if os.path.exists(pathname):
                 try:
                     shutil.rmtree(pathname)
-                except EnvironmentError, e:
-                    print >>sys.stderr, e
+                except EnvironmentError as e:
+                    print(e, file=sys.stderr)
 
     def check_players(self, discard_stderr=False):
         """Check that the engines required for the competition will run.
@@ -763,20 +766,20 @@ class Ringmaster(object):
         """
         try:
             to_check = self.competition.get_player_checks()
-        except CompetitionError, e:
+        except CompetitionError as e:
             raise RingmasterError(e)
         for check in to_check:
             if not discard_stderr:
-                print >>self.stdout, "checking player %s" % check.player.code
+                print("checking player %s" % check.player.code, self.stdout)
             try:
                 msgs = game_jobs.check_player(check, discard_stderr)
-            except game_jobs.CheckFailed, e:
-                print >>self.stdout, "player %s failed startup check:\n%s" % (
-                    check.player.code, e)
+            except game_jobs.CheckFailed as e:
+                print("player %s failed startup check:\n%s" % (
+                    check.player.code, e), file=self.stdout)
                 return False
             else:
                 if not discard_stderr:
                     for msg in msgs:
-                        print >>self.stdout, msg
+                        print(msg, file=self.stdout)
         return True
 

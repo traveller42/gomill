@@ -35,7 +35,7 @@ class Table(object):
       i = tbl.add_column(align='left', right_padding=3)
       tbl.set_column_values(i, ['a', 'b'])
       [...]
-      print '\n'.join(tbl.render())
+      print('\n'.join(tbl.render()))
 
     """
     def __init__(self, row_count=None):

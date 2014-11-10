@@ -1,6 +1,6 @@
 """Competitions for parameter tuning using Monte-carlo tree search."""
 
-from __future__ import division
+from __future__ import division, print_function
 
 import operator
 import random
@@ -253,7 +253,7 @@ class Tree(object):
 
         """
         def p(s):
-            print >>out, s
+            print(s, file=out)
 
         def describe_node(node, choice_path):
             parameters = self.format_parameters(
@@ -263,8 +263,8 @@ class Tree(object):
                 choice_s, parameters, node.value,
                 node.visits - self.initial_visits)
 
-        def most_visits((child_index, node)):
-            return node.visits
+        def most_visits(kv):
+            return kv[1].visits
 
         last_generation = [([], self.root)]
         for i, n in enumerate(summary_spec):
@@ -314,8 +314,8 @@ class Simulation(object):
         """
         uct_numerator = (self.tree.exploration_coefficient *
                          sqrt(log(node.visits)))
-        def urgency((i, child)):
-            return child.value + uct_numerator * child.rsqrt_visits
+        def urgency(kv):
+            return kv[1].value + uct_numerator * kv[1].rsqrt_visits
         start = random.randrange(len(node.children))
         children = list(enumerate(node.children))
         return max(children[start:] + children[:start], key=urgency)
@@ -397,8 +397,8 @@ class Greedy_simulation(Simulation):
 
     """
     def _choose_action(self, node):
-        def wins((i, node)):
-            return node.wins
+        def wins(kv):
+            return kv[1].wins
         return max(enumerate(node.children), key=wins)
 
 
@@ -596,7 +596,7 @@ class Mcts_tuner(Competition):
 
         try:
             specials = load_settings(self.special_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
         try:
@@ -612,7 +612,7 @@ class Mcts_tuner(Competition):
         for i, parameter_spec in enumerate(specials['parameters']):
             try:
                 pspec = self.parameter_spec_from_config(parameter_spec)
-            except StandardError, e:
+            except Exception as e:
                 code = parameter_spec.get_key()
                 if code is None:
                     code = i
@@ -627,7 +627,7 @@ class Mcts_tuner(Competition):
 
         try:
             tree_arguments = load_settings(self.tree_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
         self.tree = Tree(splits=[pspec.split for pspec in self.parameter_specs],
                          parameter_formatter=self.format_optimiser_parameters,
@@ -718,7 +718,7 @@ class Mcts_tuner(Competition):
         try:
             candidate = self.game_jobs_player_from_config(
                 player_code, candidate_config)
-        except Exception, e:
+        except Exception as e:
             raise CompetitionError(
                 "bad player spec from make_candidate():\n"
                 "%s\nparameters were: %s" %
@@ -808,7 +808,7 @@ class Mcts_tuner(Competition):
 
     def write_static_description(self, out):
         def p(s):
-            print >>out, s
+            print(s, file=out)
         p("MCTS tuning event: %s" % self.competition_code)
         if self.description:
             p(self.description)
@@ -818,34 +818,34 @@ class Mcts_tuner(Competition):
     def _write_main_report(self, out):
         games_played = self.scheduler.fixed
         if self.number_of_games is None:
-            print >>out, "%d games played" % games_played
+            print("%d games played" % games_played, file=out)
         else:
-            print >>out, "%d/%d games played" % (
-                games_played, self.number_of_games)
-        print >>out
+            print("%d/%d games played" % (
+                games_played, self.number_of_games), file=out)
+        print(file=out)
         best_simulation = self.tree.retrieve_best_parameter_simulation()
-        print >>out, "Best parameters: %s" % best_simulation.describe()
-        print >>out
+        print("Best parameters: %s" % best_simulation.describe(), file=out)
+        print(file=out)
         self.tree.summarise(out, self.summary_spec)
 
     def write_screen_report(self, out):
         self._write_main_report(out)
         if self.outstanding_simulations:
-            print >>out, "In progress:"
+            print("In progress:", file=out)
             to_show = sorted(self.outstanding_simulations.iteritems())\
                       [:self.number_of_running_simulations_to_show]
             for game_id, simulation in to_show:
-                print >>out, "game %s: %s" % (game_id, simulation.describe())
+                print("game %s: %s" % (game_id, simulation.describe()), file=out)
 
     def write_short_report(self, out):
         self.write_static_description(out)
         self._write_main_report(out)
         if self.opponent_description:
-            print >>out, "opponent (%s): %s" % (
-                self.opponent.code, self.opponent_description)
+            print("opponent (%s): %s" % (
+                self.opponent.code, self.opponent_description), file=out)
         else:
-            print >>out, "opponent: %s" % self.opponent.code
-        print >>out
+            print("opponent: %s" % self.opponent.code, file=out)
+        print(file=out)
 
     write_full_report = write_short_report
 

@@ -1,5 +1,6 @@
 """Common code for all tournament types."""
 
+from __future__ import print_function
 from collections import defaultdict
 
 from gomill import game_jobs
@@ -117,7 +118,7 @@ class Tournament(Competition):
         try:
             return Matchup(matchup_id, player_1, player_2, parameters, name,
                            event_code=self.competition_code)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
 
@@ -295,7 +296,7 @@ class Tournament(Competition):
             if first:
                 first = False
             else:
-                print >>out
+                print(file=out)
             self.write_matchup_report(out, matchup, results)
 
     def write_ghost_matchup_reports(self, out):
@@ -305,14 +306,14 @@ class Tournament(Competition):
 
         """
         for matchup_id, matchup in sorted(self.ghost_matchups.iteritems()):
-            print >>out
+            print(file=out)
             results = self.results[matchup_id]
             self.write_matchup_report(out, matchup, results)
 
     def write_player_descriptions(self, out):
         """Write descriptions of all players to 'out'."""
         for code, description in sorted(self.engine_descriptions.items()):
-            print >>out, ("player %s: %s" % (code, description))
+            print("player %s: %s" % (code, description), file=out)
 
     def get_tournament_results(self):
         return tournament_results.Tournament_results(

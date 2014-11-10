@@ -1,9 +1,13 @@
 """Live display for ringmasters."""
 
+from __future__ import print_function
 import os
 import subprocess
 import sys
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO as BytesIO
+except ImportError:
+    from io import BytesIO
 
 
 class Presenter(object):
@@ -62,7 +66,7 @@ class _Channel_writer(object):
     def __init__(self, parent, channel):
         self.parent = parent
         self.channel = channel
-        self.stringio = StringIO()
+        self.stringio = BytesIO()
 
     def write(self, s):
         self.stringio.write(s)
@@ -88,7 +92,7 @@ class Quiet_presenter(Presenter):
 
     def say(self, channel, s):
         if channel == 'warnings':
-            print >>sys.stderr, s
+            print(s, file=sys.stderr)
 
     def refresh(self):
         pass
@@ -137,7 +141,7 @@ class Clearing_presenter(Presenter):
         self.boxes[channel].contents.append(s)
         # 'warnings' box heading might be missing, but never mind.
         if channel == 'warnings':
-            print s
+            print(s)
 
     def refresh(self):
         self.clear_screen()
@@ -145,10 +149,10 @@ class Clearing_presenter(Presenter):
             if not box.contents:
                 continue
             if box.heading:
-                print "= %s = " % box.heading
-            print box.layout()
+                print("= %s = " % box.heading)
+            print(box.layout())
             if box.name != 'warnings':
-                print
+                print()
 
     def screen_height(self):
         """Return the current terminal height, or best guess."""
@@ -174,7 +178,7 @@ class Clearing_presenter(Presenter):
             if retcode != 0:
                 self.clear_method = "newlines"
         if self.clear_method == "newlines":
-            print "\n" * (self.screen_height()+1)
+            print("\n" * (self.screen_height()+1))
         elif self.clear_method == "delimiter":
-            print 78 * "-"
+            print(78 * "-")
 

@@ -1,6 +1,7 @@
 """Competitions for parameter tuning using the cross-entropy method."""
 
 from __future__ import division
+from __future__ import print_function
 
 from random import gauss as random_gauss
 from math import sqrt
@@ -191,7 +192,7 @@ class Cem_tuner(Competition):
 
         try:
             specials = load_settings(self.special_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
         try:
@@ -207,7 +208,7 @@ class Cem_tuner(Competition):
         for i, parameter_spec in enumerate(specials['parameters']):
             try:
                 pspec = self.parameter_spec_from_config(parameter_spec)
-            except StandardError, e:
+            except Exception as e:
                 code = parameter_spec.get_key()
                 if code is None:
                     code = i
@@ -331,7 +332,7 @@ class Cem_tuner(Competition):
         try:
             candidate = self.game_jobs_player_from_config(
                 player_code, candidate_config)
-        except Exception, e:
+        except Exception as e:
             raise CompetitionError(
                 "bad player spec from make_candidate():\n"
                 "%s\nparameters were: %s" %
@@ -483,7 +484,7 @@ class Cem_tuner(Competition):
 
     def write_static_description(self, out):
         def p(s):
-            print >>out, s
+            print(s, file=out)
         p("CEM tuning event: %s" % self.competition_code)
         if self.description:
             p(self.description)
@@ -491,15 +492,15 @@ class Cem_tuner(Competition):
         p("komi: %s" % self.komi)
 
     def write_screen_report(self, out):
-        print >>out, "generation %d" % self.generation
-        print >>out
-        print >>out, "wins from current samples:\n%s" % self.wins
-        print >>out
+        print("generation %d" % self.generation, file=out)
+        print(file=out)
+        print("wins from current samples:\n%s" % self.wins, file=out)
+        print(file=out)
         if self.generation == self.number_of_generations:
-            print >>out, "final distribution:"
+            print("final distribution:", file=out)
         else:
-            print >>out, "distribution for generation %d:" % self.generation
-        print >>out, self.format_distribution(self.distribution)
+            print("distribution for generation %d:" % self.generation, file=out)
+        print(self.format_distribution(self.distribution), file=out)
 
     def write_short_report(self, out):
         self.write_static_description(out)

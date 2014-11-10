@@ -14,9 +14,9 @@ from gomill.ringmasters import (
 
 def do_run(ringmaster, options):
     if not options.quiet:
-        print "running startup checks on all players"
+        print("running startup checks on all players")
     if not ringmaster.check_players(discard_stderr=True):
-        print "(use the 'check' command to see stderr output)"
+        print("(use the 'check' command to see stderr output)")
         return 1
     if options.log_gtp:
         ringmaster.enable_gtp_logging()
@@ -99,17 +99,17 @@ def run(argv, ringmaster_class):
             raise RingmasterError("control file %s not found" % ctl_pathname)
         ringmaster = ringmaster_class(ctl_pathname)
         exit_status = action(ringmaster, options)
-    except RingmasterError, e:
-        print >>sys.stderr, "ringmaster:", e
+    except RingmasterError as e:
+        print("ringmaster:", e, file=sys.stderr)
         exit_status = 1
     except KeyboardInterrupt:
         exit_status = 3
-    except RingmasterInternalError, e:
-        print >>sys.stderr, "ringmaster: internal error"
-        print >>sys.stderr, e
+    except RingmasterInternalError as e:
+        print("ringmaster: internal error", file=sys.stderr)
+        print(e, file=sys.stderr)
         exit_status = 4
     except:
-        print >>sys.stderr, "ringmaster: internal error"
+        print("ringmaster: internal error", file=sys.stderr)
         compact_tracebacks.log_traceback()
         exit_status = 4
     sys.exit(exit_status)

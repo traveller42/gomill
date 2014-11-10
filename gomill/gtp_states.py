@@ -473,7 +473,7 @@ class Gtp_state(object):
             handicap = None
         try:
             sgf_board, plays = sgf_moves.get_setup_and_moves(sgf_game)
-        except ValueError, e:
+        except ValueError as e:
             raise GtpError(str(e))
         history_moves = [History_move(colour, move)
                          for (colour, move) in plays]
@@ -569,7 +569,7 @@ class Gtp_state(object):
         sgf_moves.indicate_first_player(sgf_game)
         try:
             self._save_file(pathname, sgf_game.serialise())
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise GtpError("error writing file: %s" % e)
 
 

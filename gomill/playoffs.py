@@ -1,5 +1,6 @@
 """Competitions made up of repeated matchups between specified players."""
 
+from __future__ import print_function
 from gomill import game_jobs
 from gomill import competitions
 from gomill import tournaments
@@ -62,7 +63,7 @@ class Playoff(tournaments.Tournament):
             if 'id' in arguments:
                 try:
                     matchup_id = interpret_identifier(arguments['id'])
-                except ValueError, e:
+                except ValueError as e:
                     raise ValueError("'id': %s" % e)
             try:
                 player_1 = arguments['player_1']
@@ -86,14 +87,14 @@ class Playoff(tournaments.Tournament):
             if matchup_name is not None:
                 try:
                     matchup_name = interpret_as_utf8(matchup_name)
-                except ValueError, e:
+                except ValueError as e:
                     raise ValueError("'name': %s" % e)
             parameters = matchup_defaults.copy()
             parameters.update(interpreted)
             return self.make_matchup(
                 matchup_id, player_1, player_2,
                 parameters, matchup_name)
-        except StandardError, e:
+        except Exception as e:
             raise ControlFileError("matchup %s: %s" % (matchup_id, e))
 
 
@@ -103,7 +104,7 @@ class Playoff(tournaments.Tournament):
         try:
             matchup_defaults = load_settings(
                 tournaments.matchup_settings, config, allow_missing=True)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
         # Check default handicap settings when possible, for friendlier error
@@ -114,12 +115,12 @@ class Playoff(tournaments.Tournament):
                     matchup_defaults['handicap'],
                     matchup_defaults['handicap_style'],
                     matchup_defaults['board_size'])
-            except ControlFileError, e:
+            except ControlFileError as e:
                 raise ControlFileError("default %s" % e)
 
         try:
             specials = load_settings(self.special_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
         # map matchup_id -> Matchup
@@ -164,7 +165,7 @@ class Playoff(tournaments.Tournament):
 
     def write_short_report(self, out):
         def p(s):
-            print >>out, s
+            print(s, file=out)
         p("playoff: %s" % self.competition_code)
         if self.description:
             p(self.description)

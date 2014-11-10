@@ -14,7 +14,7 @@ from gomill.utils import *
 from gomill.common import *
 
 
-class GtpChannelError(StandardError):
+class GtpChannelError(Exception):
     """Low-level error trying to talk to a GTP engine.
 
     This is the base class for GtpProtocolError, GtpTransportError,
@@ -32,7 +32,7 @@ class GtpChannelClosed(GtpChannelError):
     """The (command or response) channel to a GTP engine has been closed."""
 
 
-class BadGtpResponse(StandardError):
+class BadGtpResponse(Exception):
     """Unacceptable response from a GTP engine.
 
     This is usually used to indicate a GTP failure ('?') response.
@@ -48,7 +48,7 @@ class BadGtpResponse(StandardError):
     """
     def __init__(self, args,
                  gtp_command=None, gtp_arguments=None, gtp_error_message=None):
-        StandardError.__init__(self, args)
+        Exception.__init__(self, args)
         self.gtp_command = gtp_command
         self.gtp_arguments = gtp_arguments
         self.gtp_error_message = gtp_error_message
@@ -405,7 +405,7 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
                 preexec_fn=permit_sigpipe, close_fds=True,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=stderr, cwd=cwd, env=env)
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise GtpChannelError(str(e))
         self.subprocess = p
         self.command_pipe = p.stdin
@@ -415,7 +415,7 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
         try:
             self.command_pipe.write(command)
             self.command_pipe.flush()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             if e.errno == errno.EPIPE:
                 raise GtpChannelClosed("engine has closed the command channel")
             else:
@@ -424,13 +424,13 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
     def get_response_line(self):
         try:
             return self.response_pipe.readline()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise GtpTransportError(str(e))
 
     def get_response_byte(self):
         try:
             return self.response_pipe.read(1)
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise GtpTransportError(str(e))
 
     def close(self):
@@ -441,11 +441,11 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
         errors = []
         try:
             self.command_pipe.close()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             errors.append("error closing command pipe:\n%s" % e)
         try:
             self.response_pipe.close()
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             errors.append("error closing response pipe:\n%s" % e)
             errors.append(str(e))
         try:
@@ -456,7 +456,7 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
             pid, exit_status, rusage = os.wait4(self.subprocess.pid, 0)
             self.exit_status = exit_status
             self.resource_usage = rusage
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             errors.append(str(e))
         if errors:
             raise GtpTransportError("\n".join(errors))
@@ -538,7 +538,7 @@ class Gtp_controller(object):
 
         """
         if self.channel_is_closed:
-            raise StandardError("channel is closed")
+            raise Exception("channel is closed")
 
         def fix_argument(argument):
             if isinstance(argument, unicode):
@@ -564,7 +564,7 @@ class Gtp_controller(object):
             self.channel.send_command(translated_command, fixed_arguments)
             is_sending = False
             is_failure, response = self.channel.get_response()
-        except GtpChannelError, e:
+        except GtpChannelError as  e:
             self.channel_is_bad = True
             if isinstance(e, GtpTransportError):
                 error_label = "transport error"
@@ -665,10 +665,10 @@ class Gtp_controller(object):
 
         """
         if self.channel_is_closed:
-            raise StandardError("channel is closed")
+            raise Exception("channel is closed")
         try:
             self.channel.close()
-        except GtpTransportError, e:
+        except GtpTransportError as e:
             raise GtpTransportError(
                 "error closing %s:\n%s" % (self.name, e))
         self.channel_is_closed = True
@@ -691,9 +691,9 @@ class Gtp_controller(object):
             return None
         try:
             return self.do_command(command, *arguments)
-        except BadGtpResponse, e:
+        except BadGtpResponse as e:
             raise
-        except GtpChannelError, e:
+        except GtpChannelError as e:
             self.errors_seen.append(str(e))
             return None
 
@@ -732,11 +732,11 @@ class Gtp_controller(object):
         if not self.channel_is_bad:
             try:
                 self.safe_do_command("quit")
-            except BadGtpResponse, e:
+            except BadGtpResponse as e:
                 self.errors_seen.append(str(e))
         try:
             self.channel.close()
-        except GtpTransportError, e:
+        except GtpTransportError as e:
             self.errors_seen.append("error closing %s:\n%s" % (self.name, e))
         self.channel_is_closed = True
 
@@ -984,7 +984,7 @@ class Game_controller(object):
         player_code = self.players[colour]
         try:
             channel = Subprocess_gtp_channel(command, **kwargs)
-        except GtpChannelError, e:
+        except GtpChannelError as e:
             raise GtpChannelError(
                 "error starting subprocess for player %s:\n%s" %
                 (player_code, e))
