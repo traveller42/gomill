@@ -4,6 +4,7 @@ This demonstrates retrieving and processing results from a tournament.
 
 """
 
+from __future__ import print_function
 import sys
 from optparse import OptionParser
 
@@ -11,8 +12,8 @@ from gomill.common import opponent_of
 from gomill.ringmasters import Ringmaster, RingmasterError
 
 def show_result(matchup, result, filename):
-    print "%s: %s forfeited game %s" % (
-        matchup.name, result.losing_player, filename)
+    print("%s: %s forfeited game %s" % (
+        matchup.name, result.losing_player, filename))
 
 def find_forfeits(ringmaster):
     ringmaster.load_status()
@@ -43,9 +44,9 @@ def main(argv):
     try:
         ringmaster = Ringmaster(ctl_pathname)
         find_forfeits(ringmaster)
-    except RingmasterError, e:
-        print >>sys.stderr, "ringmaster:"
-        print >>sys.stderr, e
+    except RingmasterError as e:
+        print("ringmaster:", file=sys.stderr)
+        print(e, file=sys.stderr)
         sys.exit(1)
 
 

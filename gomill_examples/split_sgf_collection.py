@@ -4,6 +4,7 @@ This demonstrates the parsing functions from the sgf_grammar module.
 
 """
 
+from __future__ import print_function
 import os
 import sys
 from optparse import OptionParser
@@ -19,8 +20,8 @@ def split_sgf_collection(pathname):
     root, ext = os.path.splitext(basename)
     try:
         coarse_games = sgf_grammar.parse_sgf_collection(sgf_src)
-    except ValueError, e:
-        raise StandardError("error parsing file: %s" % e)
+    except ValueError as e:
+        raise Exception("error parsing file: %s" % e)
     for i, coarse_game in enumerate(coarse_games):
         sgf_game = sgf.Sgf_game.from_coarse_game_tree(coarse_game)
         sgf_game.get_root().add_comment_text(
@@ -45,8 +46,8 @@ def main(argv):
         parser.error("too many arguments")
     try:
         split_sgf_collection(pathname)
-    except Exception, e:
-        print >>sys.stderr, "sgf_splitter:", str(e)
+    except Exception as e:
+        print("sgf_splitter:", str(e), file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":

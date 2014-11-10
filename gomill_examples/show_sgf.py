@@ -4,6 +4,7 @@ This demonstrates the sgf and ascii_boards modules.
 
 """
 
+from __future__ import print_function
 import sys
 from optparse import OptionParser
 
@@ -18,12 +19,12 @@ def show_sgf_file(pathname, move_number):
     try:
         sgf_game = sgf.Sgf_game.from_string(sgf_src)
     except ValueError:
-        raise StandardError("bad sgf file")
+        raise Exception("bad sgf file")
 
     try:
         board, plays = sgf_moves.get_setup_and_moves(sgf_game)
-    except ValueError, e:
-        raise StandardError(str(e))
+    except ValueError as e:
+        raise Exception(str(e))
     if move_number is not None:
         move_number = max(0, move_number-1)
         plays = plays[:move_number]
@@ -35,10 +36,10 @@ def show_sgf_file(pathname, move_number):
         try:
             board.play(row, col, colour)
         except ValueError:
-            raise StandardError("illegal move in sgf file")
+            raise Exception("illegal move in sgf file")
 
-    print ascii_boards.render_board(board)
-    print
+    print(ascii_boards.render_board(board))
+    print()
 
 _description = """\
 Show the position from an SGF file. If a move number is specified, the position
@@ -63,8 +64,8 @@ def main(argv):
         move_number = None
     try:
         show_sgf_file(pathname, move_number)
-    except Exception, e:
-        print >>sys.stderr, "show_sgf:", str(e)
+    except Exception as e:
+        print("show_sgf:", str(e), file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":

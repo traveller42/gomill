@@ -20,6 +20,7 @@ http://remi.coulom.free.fr/CLOP/
 #   (by convention, print "Error:" with a description)
 # - the connection script's exit status is ignored
 
+from __future__ import print_function
 import os
 import sys
 from optparse import OptionParser
@@ -141,7 +142,7 @@ class Clop_tuner(Competition):
 
         try:
             specials = load_settings(self.special_settings, config)
-        except ValueError, e:
+        except ValueError as e:
             raise ControlFileError(str(e))
 
         try:
@@ -157,7 +158,7 @@ class Clop_tuner(Competition):
         for i, parameter_spec in enumerate(specials['parameters']):
             try:
                 pspec = self.parameter_spec_from_config(parameter_spec)
-            except StandardError, e:
+            except Exception as e:
                 code = parameter_spec.get_key()
                 if code is None:
                     code = i
@@ -225,7 +226,7 @@ class Clop_tuner(Competition):
         try:
             candidate = self.game_jobs_player_from_config(
                 player_code, candidate_config)
-        except Exception, e:
+        except Exception as e:
             raise CompetitionError(
                 "bad player spec from make_candidate():\n"
                 "%s\nparameters were: %s" %
@@ -301,7 +302,7 @@ class Clop_ringmaster(Ringmaster):
     def open_logfile(self):
         try:
             self.logfile = open(self.log_pathname, "a")
-        except EnvironmentError, e:
+        except EnvironmentError as e:
             raise RingmasterError("failed to open log file:\n%s" % e)
 
     def run_game_for_clop(self, seed, parameters):
@@ -326,7 +327,7 @@ class Clop_ringmaster(Ringmaster):
                 self.warn(warning)
             for log_entry in response.log_entries:
                 self.log(log_entry)
-        except (CompetitionError, JobFailed), e:
+        except (CompetitionError, JobFailed) as e:
             raise RingmasterError(e)
         result = response.game_result
         candidate_colour = self.competition.candidate_colour
@@ -412,7 +413,7 @@ def do_run_game(ringmaster, arguments, options):
     ringmaster.set_display_mode('quiet')
     ringmaster.open_logfile()
     message = ringmaster.run_game_for_clop(seed, parameters)
-    print message
+    print(message)
 
 _actions = {
     "setup" : (do_setup, False),
@@ -447,22 +448,22 @@ def main(argv):
         ringmaster = Clop_ringmaster(ctl_pathname)
         action(ringmaster, command_args, options)
         exit_status = 0
-    except RingmasterError, e:
-        print >>sys.stderr, "gomill-clop:", e
+    except RingmasterError as e:
+        print("gomill-clop:", e, file=sys.stderr)
         exit_status = 1
     except KeyboardInterrupt:
         exit_status = 3
-    except RingmasterInternalError, e:
-        print >>sys.stderr, "gomill-clop: internal error"
-        print >>sys.stderr, e
+    except RingmasterInternalError as e:
+        print("gomill-clop: internal error", file=sys.stderr)
+        print(e, file=sys.stderr)
         exit_status = 4
     except:
-        print >>sys.stderr, "gomill-clop: internal error"
+        print("gomill-clop: internal error", file=sys.stderr)
         compact_tracebacks.log_traceback()
         exit_status = 4
     if exit_status != 0 and command == 'run-game':
         # Make sure the problem runner sees an error response
-        print "Error"
+        print("Error")
     sys.exit(exit_status)
 
 if __name__ == "__main__":

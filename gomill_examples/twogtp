@@ -8,7 +8,7 @@ This demonstrates gtp_controllers.Game_controller and the gtp_games module.
 
 """
 
-from __future__ import with_statement
+from __future__ import with_statement, print_function
 
 import shlex
 import sys
@@ -27,12 +27,12 @@ def write_sgf(sgf_game, game_number, pathname_prefix):
         f.write(sgf_game.serialise())
 
 def print_move(colour, move, board, **kwargs):
-    print colour.upper(), format_vertex(move)
+    print(colour.upper(), format_vertex(move))
 
 def print_board(colour, move, board, **kwargs):
-    print colour.upper(), format_vertex(move)
-    print ascii_boards.render_board(board)
-    print
+    print(colour.upper(), format_vertex(move))
+    print(ascii_boards.render_board(board))
+    print()
 
 def main():
     usage = "%prog [options] --black='<command>' --white='<command>'"
@@ -64,17 +64,17 @@ def main():
     try:
         game_controller.set_player_subprocess('b', black_command)
         game_controller.set_player_subprocess('w', white_command)
-    except GtpChannelError, e:
+    except GtpChannelError as e:
         game_controller.close_players()
         sys.exit("error creating players:\n%s\n" % e)
 
     eds = game_controller.engine_descriptions
     if options.verbose == '1':
-        print 'Black: %s' % eds['b'].get_short_description()
-        print 'White: %s' % eds['w'].get_short_description()
+        print('Black: %s' % eds['b'].get_short_description())
+        print('White: %s' % eds['w'].get_short_description())
     elif options.verbose == '2':
-        print 'Black: %s\n' % eds['b'].get_long_description()
-        print 'White: %s\n' % eds['w'].get_long_description()
+        print('Black: %s\n' % eds['b'].get_long_description())
+        print('White: %s\n' % eds['w'].get_long_description())
 
     for game_number in xrange(options.games):
         game = gtp_games.Gtp_game(
@@ -93,17 +93,17 @@ def main():
         try:
             game.prepare()
             game.run()
-        except (GtpChannelError, BadGtpResponse), e:
+        except (GtpChannelError, BadGtpResponse) as e:
             game_controller.close_players()
             sys.exit("aborting run due to error:\n%s\n" % e)
-        print game.result.describe()
+        print(game.result.describe())
 
         if options.sgfbase is not None:
             sgf_game = game.make_sgf()
             sgf_game.get_root().set("AP", ("Gomill twogtp", __version__))
             try:
                 write_sgf(sgf_game, game_number, options.sgfbase)
-            except EnvironmentError, e:
+            except EnvironmentError as e:
                 sys.exit("error writing SGF file: %s" % e)
 
     game_controller.close_players()

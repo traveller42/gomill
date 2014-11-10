@@ -4,6 +4,7 @@ This supports saving a game record after each game, if the underlying engine
 supports gomill-savesgf.
 
 """
+from __future__ import print_function
 import os
 import sys
 from optparse import OptionParser
@@ -50,7 +51,7 @@ class Kgs_proxy(object):
             self.do_savesgf = False
 
     def log(self, s):
-        print >>sys.stderr, s
+        print(s, file=sys.stderr)
 
     def run(self):
         self.proxy = gtp_proxy.Gtp_proxy()
@@ -67,7 +68,7 @@ class Kgs_proxy(object):
             # Colour that we appear to be playing
             self.my_colour = None
             self.initialise_name()
-        except gtp_proxy.BackEndError, e:
+        except gtp_proxy.BackEndError as e:
             sys.exit("kgs_proxy: %s" % e)
         try:
             self.proxy.run()
@@ -112,7 +113,7 @@ class Kgs_proxy(object):
             filename = self.filename_template % i
             if filename not in existing:
                 return filename
-        raise StandardError("too many sgf files")
+        raise Exception("too many sgf files")
 
     def handle_game_over(self, args):
         """Handler for kgs-game_over.
@@ -133,7 +134,7 @@ class Kgs_proxy(object):
                                         escape_for_savesgf(self.my_name)))
             try:
                 self.proxy.handle_command("gomill-savesgf", args)
-            except GtpError, e:
+            except GtpError as e:
                 # Hide error from kgsGtp, though I don't suppose it would care
                 self.log("error: %s" % e)
 
