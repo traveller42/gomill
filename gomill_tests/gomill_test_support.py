@@ -2,6 +2,8 @@
 
 import re
 
+import six
+
 from gomill import __version__
 from gomill_tests.test_framework import unittest2
 from gomill_tests.fs_test_support import Sandbox_testcase_mixin
@@ -57,9 +59,9 @@ def compare_boards_or_diagrams(b1, b2):
             return board, ascii_boards.interpret_diagram(diagram, board.side)
         except ValueError:
             return ascii_boards.render_board(board), diagram
-    if isinstance(b1, boards.Board) and isinstance(b2, basestring):
+    if isinstance(b1, boards.Board) and isinstance(b2, six.string_types):
         b1, b2 = coerce(b1, b2)
-    elif isinstance(b2, boards.Board) and isinstance(b1, basestring):
+    elif isinstance(b2, boards.Board) and isinstance(b1, six.string_types):
         b2, b1 = coerce(b2, b1)
     if isinstance(b1, boards.Board):
         return compare_boards(b1, b2)

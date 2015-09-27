@@ -38,7 +38,7 @@ class FrameworkTestCase(unittest2.TestCase):
         expected = list(expected_seq)
         actual = list(actual_seq)
         missing, unexpected = unittest2.util.unorderable_list_difference(
-            expected, actual, ignore_duplicate=False
+            expected, actual
         )
         errors = []
         if missing:

@@ -2,6 +2,8 @@
 
 from itertools import chain
 
+from six.moves import xrange
+
 from gomill.common import *
 
 class _Group(object):
