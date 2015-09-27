@@ -9,6 +9,7 @@ This is for generic utilities; see common for Go-specific utility functions.
 from __future__ import division
 import errno
 import os
+import six
 
 __all__ = ["format_float", "format_percent", "sanitise_utf8", "isinf", "isnan"]
 
@@ -58,12 +59,13 @@ def sanitise_utf8(s):
     """
     if s is None:
         return None
-    try:
-        s.decode("utf-8")
-    except UnicodeDecodeError:
-        return (s.decode("utf-8", 'replace')
-                .replace(u"\ufffd", u"?")
-                .encode("utf-8"))
+
+    if isinstance(s, six.binary_type):
+        try:
+            u = s.decode("utf-8")
+        except UnicodeDecodeError:
+            return (s.decode("utf-8", 'replace').replace(u"\ufffd", u"?"))
+        return u
     else:
         return s
 

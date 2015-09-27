@@ -32,11 +32,15 @@ def test_format_percent(tc):
 def test_sanitise_utf8(tc):
     su = utils.sanitise_utf8
     tc.assertIsNone(su(None))
-    tc.assertEqual(su(""), "")
-    tc.assertEqual(su("hello world"), "hello world")
-    s = u"test \N{POUND SIGN}".encode("utf-8")
+    tc.assertEqual(su(b""), u"")
+    tc.assertEqual(su(u""), u"")
+    tc.assertEqual(su(b"hello world"), u"hello world")
+    tc.assertEqual(su(u"hello world"), u"hello world")
+    s = u"test \N{POUND SIGN}"
+    b = s.encode("utf-8")
+    tc.assertEqual(su(b), u"test \N{POUND SIGN}")
     tc.assertIs(su(s), s)
-    tc.assertEqual(su(u"test \N{POUND SIGN}".encode("latin1")), "test ?")
+    tc.assertEqual(su(u"test \N{POUND SIGN}".encode("latin1")), u"test ?")
 
 def test_isinf(tc):
     tc.assertIs(utils.isinf(0), False)

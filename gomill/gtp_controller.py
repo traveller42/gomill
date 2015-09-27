@@ -787,23 +787,28 @@ class Engine_description(object):
     """
     def __init__(self, raw_name, raw_version, raw_description):
         self.raw_name = raw_name
+        # Python 3 FIX ME - CBW - 2015-09-26
+        # Forcing fields back to 8-bit data to suppress error in tournaments.py
+        # due to unicode output from sanitise_utf8
+        # This block can be removed when translation updated to support unicode
         if raw_name:
-            self.name = sanitise_utf8(raw_name)
+            self.name = sanitise_utf8(raw_name).encode("utf-8")
         else:
             self.name = None
 
         self.raw_version = raw_version
         if raw_version:
-            self.version = sanitise_utf8(raw_version)
+            self.version = sanitise_utf8(raw_version).encode("utf-8")
             self.clean_version = self._fix_version(self.name, self.version)
         else:
             self.version = None
             self.clean_version = None
 
         if raw_description:
-            self.description = sanitise_utf8(raw_description)
+            self.description = sanitise_utf8(raw_description).encode("utf-8")
         else:
             self.description = None
+        # End Python 3 FIX ME - CBW - 2015-09-26            
 
     @staticmethod
     def _fix_version(name, version):
