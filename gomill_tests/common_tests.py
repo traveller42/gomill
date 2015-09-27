@@ -28,7 +28,7 @@ def test_colour_name(tc):
 
 def test_column_letters(tc):
     tc.assertEqual(common.column_letters,
-                   "".join(c for c in string.uppercase if c != 'I'))
+                   "".join(c for c in string.ascii_uppercase if c != 'I'))
 
 def test_format_vertex(tc):
     fv = common.format_vertex
