@@ -3,6 +3,8 @@
 import re
 import shlex
 
+import six
+
 __all__ = ['Setting', 'allow_none', 'load_settings',
            'Config_proxy', 'Quiet_config',
            'interpret_any', 'interpret_bool',
@@ -26,12 +28,12 @@ def interpret_bool(b):
     return b
 
 def interpret_int(i):
-    if not isinstance(i, int) or isinstance(i, long):
+    if not isinstance(i, six.integer_types):
         raise ValueError("invalid integer")
     return i
 
 def interpret_positive_int(i):
-    if not isinstance(i, int) or isinstance(i, long):
+    if not isinstance(i, six.integer_types):
         raise ValueError("invalid integer")
     if i <= 0:
         raise ValueError("must be positive integer")
@@ -40,14 +42,14 @@ def interpret_positive_int(i):
 def interpret_float(f):
     if isinstance(f, float):
         return f
-    if isinstance(f, int) or isinstance(f, long):
+    if isinstance(f, six.integer_types):
         return float(f)
     raise ValueError("invalid float")
 
 def interpret_8bit_string(s):
-    if isinstance(s, str):
+    if isinstance(s, six.binary_type):
         result = s
-    elif isinstance(s, unicode):
+    elif isinstance(s, six.text_type):
         try:
             result = s.encode("ascii")
         except UnicodeEncodeError:
@@ -59,13 +61,13 @@ def interpret_8bit_string(s):
     return result
 
 def interpret_as_utf8(s):
-    if isinstance(s, str):
+    if isinstance(s, six.binary_type):
         try:
             s.decode("utf-8")
         except UnicodeDecodeError:
             raise ValueError("not a valid utf-8 string")
         return s
-    if isinstance(s, unicode):
+    if isinstance(s, six.text_type):
         return s.encode("utf-8")
     if s is None:
         return ""
@@ -82,14 +84,14 @@ def clean_string(s):
 _identifier_re = re.compile(r"\A[-!$%&*+-.:;<=>?^_~a-zA-Z0-9]*\Z")
 
 def interpret_identifier(s):
-    if isinstance(s, unicode):
+    if isinstance(s, six.text_type):
         try:
             s = s.encode("ascii")
         except UnicodeEncodeError:
             raise ValueError(
                 "contains forbidden character: %s" %
                 clean_string(s.encode("ascii", "replace")))
-    elif not isinstance(s, str):
+    elif not isinstance(s, six.binary_type):
         raise ValueError("not a string")
     if not s:
         raise ValueError("empty string")

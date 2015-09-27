@@ -5,6 +5,8 @@ from __future__ import with_statement
 
 from textwrap import dedent
 
+from six.moves import xrange
+
 from gomill_tests import gomill_test_support
 
 from gomill import sgf

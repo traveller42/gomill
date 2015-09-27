@@ -5,6 +5,8 @@ try:
 except ImportError:
     import pickle
 
+from six.moves import xrange
+
 from gomill import competition_schedulers
 
 from gomill_tests import gomill_test_support

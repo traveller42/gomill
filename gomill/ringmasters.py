@@ -18,6 +18,8 @@ try:
 except ImportError:
     fcntl = None
 
+import six
+
 from gomill import compact_tracebacks
 from gomill import game_jobs
 from gomill import job_manager
@@ -132,7 +134,7 @@ class Ringmaster(object):
     def _read_control_file(self):
         """Return the contents of the control file as an 8-bit string."""
         try:
-            with open(self.control_pathname) as f:
+            with open(self.control_pathname, "rb") as f:
                 return f.read()
         except EnvironmentError as e:
             raise RingmasterError("failed to read control file:\n%s" % e)
@@ -141,6 +143,10 @@ class Ringmaster(object):
         """Main implementation for __init__."""
 
         control_s = self._read_control_file()
+
+        # Ensure we control_s is binary type
+        if isinstance(control_s, six.text_type):
+            control_s = control_s.encode("utf-8")
 
         try:
             self.competition_type = self._parse_competition_type(control_s)

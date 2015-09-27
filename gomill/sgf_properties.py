@@ -10,6 +10,9 @@ points.
 
 import codecs
 
+import six
+from six.moves import xrange
+
 from gomill import sgf_grammar
 from gomill.utils import isinf, isnan
 
@@ -209,6 +212,12 @@ def _transcode(s, encoding):
     """Common implementation for interpret_text and interpret_simpletext."""
     # If encoding is UTF-8, we don't need to transcode, but we still want to
     # report an error if it's not properly encoded.
+    # returns 8-bit utf8 string
+
+    # Ensure we are handling an 8-bit string
+    if isinstance(s, six.text_type):
+        s = s.encode(encoding)
+
     u = s.decode(encoding)
     if encoding == "UTF-8":
         return s
@@ -235,6 +244,9 @@ def serialise_simpletext(s, context):
     s -- 8-bit utf-8 string
 
     """
+    if isinstance(s, six.text_type):
+        s = s.encode("utf-8")
+
     if context.encoding != "UTF-8":
         s = s.decode("utf-8").encode(context.encoding)
     return sgf_grammar.escape_text(s)
@@ -260,6 +272,9 @@ def serialise_text(s, context):
     s -- 8-bit utf-8 string
 
     """
+    if isinstance(s, six.text_type):
+        s = s.encode("utf-8")
+
     if context.encoding != "UTF-8":
         s = s.decode("utf-8").encode(context.encoding)
     return sgf_grammar.escape_text(s)
