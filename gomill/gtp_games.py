@@ -6,8 +6,6 @@ from gomill import gameplay
 from gomill import gtp_controller
 from gomill.gtp_controller import BadGtpResponse
 
-import six
-
 class Game_result(gameplay.Result):
     """Description of a game result.
 
@@ -264,13 +262,6 @@ class _Gtp_backend(gameplay.Backend):
     def get_last_move_comment(self, colour):
         comment = self.gc.maybe_send_command(colour, "gomill-explain_last_move")
         comment = sanitise_utf8(comment)
-        # Python 3 FIX ME - CBW - 2015-09-26
-        # Forcing comment back to 8-bit data to suppress error in sgf_grammar.py
-        # due to unicode output from sanitise_utf8
-        # This block can be removed when translation updated to support unicode
-        if isinstance(comment, six.text_type):
-            comment = comment.encode("utf-8")
-        # End Python 3 FIX ME - CBW - 2015-09-26
         if comment == "":
             comment = None
         return comment

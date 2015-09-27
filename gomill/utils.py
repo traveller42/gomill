@@ -48,7 +48,7 @@ def sanitise_utf8(s):
 
     s -- 8-bit string (or None)
 
-    Returns the sanitised string. If the string was already valid utf-8, returns
+    Returns the sanitised 8-bit string. If the string was already valid utf-8, returns
     the same object.
 
     This replaces bad characters with ascii question marks (I don't want to use
@@ -62,12 +62,14 @@ def sanitise_utf8(s):
 
     if isinstance(s, six.binary_type):
         try:
-            u = s.decode("utf-8")
+            s.decode("utf-8")
         except UnicodeDecodeError:
-            return (s.decode("utf-8", 'replace').replace(u"\ufffd", u"?"))
-        return u
-    else:
+            return (s.decode("utf-8", 'replace')
+                    .replace(u"\ufffd", u"?")
+                    .encode("utf-8"))
         return s
+    else:
+        return s.encode("utf-8")
 
 def ensure_dir(pathname):
     """Create a directory, unless it already exists."""
