@@ -402,7 +402,8 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
         try:
             p = subprocess.Popen(
                 command,
-                preexec_fn=permit_sigpipe, close_fds=True,
+                #preexec_fn=permit_sigpipe, SIGPIPE issue fixed in python3?
+                close_fds=True,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=stderr, cwd=cwd, env=env)
         except EnvironmentError as e:
@@ -413,7 +414,7 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
 
     def send_command_line(self, command):
         try:
-            self.command_pipe.write(command)
+            self.command_pipe.write(command.encode())
             self.command_pipe.flush()
         except EnvironmentError as e:
             if e.errno == errno.EPIPE:
@@ -423,13 +424,13 @@ class Subprocess_gtp_channel(Linebased_gtp_channel):
 
     def get_response_line(self):
         try:
-            return self.response_pipe.readline()
+            return self.response_pipe.readline().decode()
         except EnvironmentError as e:
             raise GtpTransportError(str(e))
 
     def get_response_byte(self):
         try:
-            return self.response_pipe.read(1)
+            return self.response_pipe.read(1).decode()
         except EnvironmentError as e:
             raise GtpTransportError(str(e))
 
@@ -541,13 +542,10 @@ class Gtp_controller(object):
             raise Exception("channel is closed")
 
         def fix_argument(argument):
-            if isinstance(argument, unicode):
-                return argument.encode("utf-8")
-            else:
-                return argument
+            return argument
 
         fixed_command = fix_argument(command)
-        fixed_arguments = map(fix_argument, arguments)
+        fixed_arguments = list(map(fix_argument, arguments))
         translated_command = self.gtp_aliases.get(fixed_command, fixed_command)
         is_first_command = self.is_first_command
         self.is_first_command = False

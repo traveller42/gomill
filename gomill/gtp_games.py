@@ -91,7 +91,7 @@ class Game_result(gameplay.Result):
         If a value is already set (not None), this method doesn't change it.
 
         """
-        for colour, cpu_time in cpu_times.iteritems():
+        for colour, cpu_time in cpu_times.items():
             if self.cpu_times[self.players[colour]] is not None:
                 continue
             self.cpu_times[self.players[colour]] = cpu_time

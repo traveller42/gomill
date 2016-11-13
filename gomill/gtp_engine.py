@@ -157,10 +157,7 @@ def _clean_response(response):
     """Clean up a proposed response."""
     if response is None:
         return ""
-    if isinstance(response, unicode):
-        s = response.encode("utf-8")
-    else:
-        s = str(response)
+    s = str(response)
     s = s.rstrip()
     s = s.replace("\n\n", "\n.\n")
     s = _remove_response_controls_re.sub("", s)
