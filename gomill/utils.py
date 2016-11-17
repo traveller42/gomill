@@ -58,14 +58,17 @@ def sanitise_utf8(s):
     """
     if s is None:
         return None
-    try:
-        s.decode("utf-8")
-    except UnicodeDecodeError:
-        return (s.decode("utf-8", 'replace')
-                .replace(u"\ufffd", u"?")
-                .encode("utf-8"))
-    else:
+    elif type(s) is str:
         return s
+    else:
+        try:
+            s.decode("utf-8")
+        except UnicodeDecodeError:
+            return (s.decode("utf-8", 'replace')
+                    .replace(u"\ufffd", u"?")
+                    .encode("utf-8"))
+        else:
+            return s
 
 def ensure_dir(pathname):
     """Create a directory, unless it already exists."""

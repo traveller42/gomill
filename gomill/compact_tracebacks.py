@@ -3,6 +3,7 @@
 from __future__ import print_function
 import sys
 import traceback
+import io
 
 def log_traceback_from_info(exception_type, value, tb, dst=sys.stderr, skip=0):
     """Log a given exception nicely to 'dst', showing a traceback.
@@ -12,21 +13,21 @@ def log_traceback_from_info(exception_type, value, tb, dst=sys.stderr, skip=0):
 
     """
     for line in traceback.format_exception_only(exception_type, value):
-        dst.write(line)
+        write_to_stream(line,dst)
     if (not isinstance(exception_type, str) and
         issubclass(exception_type, SyntaxError)):
         return
-    print('traceback (most recent call last):', file=dst)
+    write_to_stream("traceback (most recent call last):\n", dst)
     text = None
     for filename, lineno, fnname, text in traceback.extract_tb(tb)[skip:]:
         if fnname == "?":
             fn_s = "<global scope>"
         else:
             fn_s = "(%s)" % fnname
-        print("  %s:%s %s" % (filename, lineno, fn_s), file=dst)
+        write_to_stream("  %s:%s %s\n" % (filename, lineno, fn_s), dst)
     if text is not None:
-        print("failing line:", file=dst)
-        print(text, file=dst)
+        write_to_stream("failing line:\n", dst)
+        write_to_stream(text + '\n', dst)
 
 def format_traceback_from_info(exception_type, value, tb, skip=0):
     """Return a description of a given exception as a string.
@@ -34,11 +35,7 @@ def format_traceback_from_info(exception_type, value, tb, skip=0):
     skip -- number of traceback entries to omit from the top of the list
 
     """
-    try:
-      from io import BytesIO
-    except:
-      from cStringIO import StringIO as BytesIO
-    log = BytesIO()
+    log = io.StringIO()
     log_traceback_from_info(exception_type, value, tb, log, skip)
     return log.getvalue()
 
@@ -67,24 +64,20 @@ def log_error_and_line_from_info(exception_type, value, tb, dst=sys.stderr):
     if (not isinstance(exception_type, str) and
         issubclass(exception_type, SyntaxError)):
         for line in traceback.format_exception_only(exception_type, value):
-            dst.write(line)
+            write_to_stream(line, dst)
     else:
         try:
             filename, lineno, fnname, text = traceback.extract_tb(tb)[-1]
         except IndexError:
             pass
         else:
-            print("at line %s:" % lineno, file=dst)
+            write_to_stream("at line %s:\n" % lineno, dst)
         for line in traceback.format_exception_only(exception_type, value):
-            dst.write(line)
+            write_to_stream(line, dst)
 
 def format_error_and_line_from_info(exception_type, value, tb):
     """Return a brief description of a given exception as a string."""
-    try:
-      from io import BytesIO
-    except:
-      from cStringIO import StringIO as BytesIO
-    log = BytesIO()
+    log = io.StringIO()
     log_error_and_line_from_info(exception_type, value, tb, log)
     return log.getvalue()
 
@@ -102,3 +95,12 @@ def format_error_and_line():
     exception_type, value, tb = sys.exc_info()
     return format_error_and_line_from_info(exception_type, value, tb)
 
+def write_to_stream(message, dst):
+    if type(message) is str and isinstance(dst, io.TextIOBase):
+        dst.write(message)
+    elif type(message) is str and isinstance(dst, io.BufferedIOBase):
+        dst.write(message.encode())
+    elif type(bessage) is bytes and isinstance(dst, io.TextIOBase):
+        dst.write(message.decode())
+    else: #type(message) is bytes and isinstance(dst, ioBufferedIOBase)
+        dst.write(message)
